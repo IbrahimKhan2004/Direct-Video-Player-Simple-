@@ -1,0 +1,177 @@
+/* --- Base Styles (from first example) --- */
+:root {
+    /* Using a variable for the main color for consistency */
+    --player-theme-color: #00aaff; /* A slightly bright blue for controls */
+    --player-background-color: #000000;
+    --container-background-color: #1a1a1a;
+    --input-background-color: #2c2c2c;
+    --text-color: #e0e0e0;
+    --text-color-darker: #ccc;
+    --border-color: #444;
+    --recommendation-border-color: #4caf50;
+}
+
+body {
+    background-color: var(--player-background-color); /* Pure black for AMOLED */
+    color: var(--text-color); /* Light grey text */
+    font-family: sans-serif;
+    margin: 0;
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    box-sizing: border-box;
+}
+
+.container {
+    width: 100%;
+    max-width: 800px; /* Limit max width */
+    display: flex;
+    flex-direction: column;
+    gap: 20px; /* Space between elements */
+}
+
+.info-box {
+    background-color: var(--container-background-color); /* Very dark grey */
+    padding: 15px;
+    border-radius: 8px;
+    border-left: 4px solid var(--player-theme-color);
+    font-size: 0.9em;
+    line-height: 1.5;
+}
+
+.info-box.recommendation {
+     border-left-color: var(--recommendation-border-color); /* Green border */
+}
+
+.info-box p {
+    margin: 5px 0;
+}
+
+.input-area {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    background-color: var(--container-background-color);
+    padding: 20px;
+    border-radius: 8px;
+}
+
+input[type="url"] {
+    background-color: var(--input-background-color); /* Darker input background */
+    color: var(--text-color);
+    border: 1px solid var(--border-color);
+    padding: 12px 15px;
+    border-radius: 5px;
+    font-size: 1em;
+    outline: none;
+    transition: border-color 0.3s ease;
+}
+
+input[type="url"]:focus {
+    border-color: var(--player-theme-color);
+}
+
+input[type="url"]::placeholder {
+    color: #888;
+}
+
+/* Style for the main Load/Play button */
+#load-video-button {
+    background-color: var(--player-theme-color);
+    color: #ffffff;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 1.1em;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    font-weight: bold;
+}
+
+#load-video-button:hover {
+    background-color: #0088cc; /* Darker blue on hover */
+}
+
+.subtitle-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--text-color-darker);
+    font-size: 0.95em;
+}
+
+/* Simple Toggle Switch CSS (from first example) */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 24px;
+}
+.switch input { opacity: 0; width: 0; height: 0; }
+.slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .4s; }
+.slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+input:checked + .slider { background-color: var(--player-theme-color); }
+input:focus + .slider { box-shadow: 0 0 1px var(--player-theme-color); }
+input:checked + .slider:before { transform: translateX(26px); }
+.slider.round { border-radius: 24px; }
+.slider.round:before { border-radius: 50%; }
+
+#subtitle-url {
+    transition: all 0.3s ease-in-out;
+}
+
+.player-container {
+    width: 100%;
+    background-color: var(--player-background-color); /* Ensure container bg is black */
+    border-radius: 8px; /* Optional: round corners */
+    overflow: hidden; /* Clip video to rounded corners if applied */
+}
+
+/* Style the native video player */
+#videoPlayer {
+    display: block; /* Prevents extra space below video */
+    width: 100%;
+    height: auto;
+    border: none; /* Remove default border if any */
+}
+
+/* --- Highlight: Styles for Custom Controls (from second example, adapted for dark theme) --- */
+.controls {
+    margin-top: 15px;
+    display: flex;
+    flex-wrap: wrap; /* Allow controls to wrap on smaller screens */
+    gap: 8px; /* Space between control elements */
+    justify-content: center; /* Center controls */
+    padding: 10px;
+    background-color: var(--container-background-color); /* Match input area background */
+    border-radius: 8px;
+}
+
+.controls button, .controls select {
+    padding: 8px 12px;
+    font-size: 0.9em; /* Slightly smaller font */
+    border: 1px solid var(--border-color); /* Use theme border color */
+    border-radius: 4px;
+    cursor: pointer;
+    background-color: var(--input-background-color); /* Use theme input background */
+    color: var(--text-color); /* Use theme text color */
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+}
+
+.controls button:hover, .controls select:hover {
+    background-color: #3a3a3a; /* Slightly lighter dark background on hover */
+    border-color: var(--player-theme-color); /* Highlight border on hover */
+}
+
+.controls select {
+    /* Specific styling for select dropdowns if needed */
+    appearance: none; /* Remove default dropdown arrow */
+    background-image: url('data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23cccccc%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E'); /* Custom arrow */
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    background-size: 10px auto;
+    padding-right: 30px; /* Make space for the custom arrow */
+}
+/* --- End Highlight --- */
