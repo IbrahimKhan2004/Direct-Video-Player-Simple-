@@ -19,13 +19,18 @@
         <div class="input-area">
             <input type="url" id="videoUrl" placeholder="Paste Video URL Here!" required>
             <div class="subtitle-toggle">
-                <label for="subtitle-switch">Want to add subtitles?</label>
+                <!-- *** START OF HIGHLIGHTED CHANGE *** -->
+                <label for="subtitle-switch">Want to add local subtitles?</label> <!-- Changed label text -->
+                <!-- *** END OF HIGHLIGHTED CHANGE *** -->
                 <label class="switch">
                     <input type="checkbox" id="subtitle-switch">
                     <span class="slider round"></span>
                 </label>
             </div>
-            <input type="url" id="subtitle-url" placeholder="Paste Subtitle URL Here! (.vtt)" style="display: none;">
+            <!-- *** START OF HIGHLIGHTED CHANGE *** -->
+            <!-- Changed input type to 'file', updated id, added accept attribute -->
+            <input type="file" id="subtitle-file" accept=".vtt" style="display: none;">
+            <!-- *** END OF HIGHLIGHTED CHANGE *** -->
             <button id="load-video-button">Play Video</button>
         </div>
 
@@ -59,7 +64,7 @@
         </div>
     </div>
 
-    <!-- Link to the custom JS (logic modified) -->
+    <!-- Link to the custom JS -->
     <script src="script.js"></script>
 </body>
 </html>
