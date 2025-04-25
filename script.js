@@ -1,9 +1,11 @@
 /**
  * Script for Plain HTML Video Player with Native Controls and Dark Theme
  * Includes:
- * - URL and Subtitle Input Handling
- * - Dynamic Subtitle Track Addition
+ * - URL Input Handling
+ * - Local Subtitle File Input Handling
+ * - Dynamic Subtitle Track Addition using Object URL
  * - Resume Playback Logic (Save on 'timeupdate', Load from localStorage)
+ * - Attempt to set Hindi audio track by default
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -11,18 +13,30 @@ document.addEventListener('DOMContentLoaded', () => {
     const videoPlayer = document.getElementById('videoPlayer');
     const videoUrlInput = document.getElementById('videoUrl');
     const subtitleSwitch = document.getElementById('subtitle-switch');
-    const subtitleUrlInput = document.getElementById('subtitle-url');
+    // --- START OF HIGHLIGHTED CHANGE: Get file input reference ---
+    // Get reference to the new file input element
+    const subtitleFileInput = document.getElementById('subtitle-file');
+    // --- END OF HIGHLIGHTED CHANGE ---
     const loadVideoButton = document.getElementById('load-video-button');
     // Removed references to audio/subtitle select elements
 
     const RESUME_KEY_PREFIX = 'htmlVideoResume_'; // Unique prefix
+    // --- START OF HIGHLIGHTED CHANGE: Variable to store the current object URL ---
+    // Keep track of the generated object URL for the subtitle file to allow cleanup
+    let currentSubtitleObjectURL = null;
+    // --- END OF HIGHLIGHTED CHANGE ---
+
 
     // --- Subtitle Input Toggle ---
     subtitleSwitch.addEventListener('change', () => {
-        subtitleUrlInput.style.display = subtitleSwitch.checked ? 'block' : 'none';
+        // --- START OF HIGHLIGHTED CHANGE: Show/hide file input ---
+        // Toggle the visibility of the file input based on the switch state
+        subtitleFileInput.style.display = subtitleSwitch.checked ? 'block' : 'none';
+        // Clear the file input if the switch is turned off to avoid confusion
         if (!subtitleSwitch.checked) {
-            subtitleUrlInput.value = '';
+            subtitleFileInput.value = ''; // Resets the file selection
         }
+        // --- END OF HIGHLIGHTED CHANGE ---
     });
 
     // --- Load Video Button Action ---
@@ -31,11 +45,24 @@ document.addEventListener('DOMContentLoaded', () => {
     // --- Core Video Loading Function ---
     function loadVideo() {
         const url = videoUrlInput.value.trim();
-        const subUrl = subtitleUrlInput.value.trim();
+        // --- START OF HIGHLIGHTED CHANGE: Get selected file ---
+        // Get the File object from the file input, if one is selected
+        const subtitleFile = subtitleFileInput.files[0];
+        // --- END OF HIGHLIGHTED CHANGE ---
         const useSubtitles = subtitleSwitch.checked;
 
         console.log(`Attempting to load video: ${url}`);
         if (url) {
+            // --- START OF HIGHLIGHTED CHANGE: Revoke previous object URL ---
+            // Before creating a new object URL, revoke the old one if it exists
+            // This prevents memory leaks by releasing the reference to the previous file blob
+            if (currentSubtitleObjectURL) {
+                URL.revokeObjectURL(currentSubtitleObjectURL);
+                console.log(`Revoked previous subtitle object URL: ${currentSubtitleObjectURL}`);
+                currentSubtitleObjectURL = null; // Reset the variable
+            }
+            // --- END OF HIGHLIGHTED CHANGE ---
+
             // --- Clear existing tracks before setting new source ---
             const existingTracks = videoPlayer.querySelectorAll('track');
             existingTracks.forEach(track => track.remove());
@@ -43,23 +70,41 @@ document.addEventListener('DOMContentLoaded', () => {
 
             videoPlayer.src = url; // Set the main video source
 
-            // --- Dynamically add subtitle track if requested ---
-            if (useSubtitles && subUrl) {
+            // --- START OF HIGHLIGHTED CHANGE: Dynamically add subtitle track from local file ---
+            // Proceed only if the subtitle switch is checked AND a file was actually selected
+            if (useSubtitles && subtitleFile) {
                 try {
+                    // Create a temporary local URL (blob URL) representing the selected file
+                    currentSubtitleObjectURL = URL.createObjectURL(subtitleFile);
+                    console.log(`Created subtitle object URL: ${currentSubtitleObjectURL} for file: ${subtitleFile.name}`);
+
+                    // Create a new <track> element for the subtitles
                     const trackElement = document.createElement('track');
                     trackElement.kind = 'subtitles';
-                    trackElement.label = 'Custom Subtitles';
-                    trackElement.srclang = 'en';
-                    trackElement.src = subUrl;
-                    // Let the browser decide if it's default based on its logic or user settings
-                    // trackElement.default = true;
+                    // Use the filename (without extension) as a label, fallback to generic label
+                    trackElement.label = subtitleFile.name.replace(/\.[^/.]+$/, "") || 'Local Subtitle';
+                    trackElement.srclang = 'en'; // Default language code (can be changed or detected)
+                    trackElement.src = currentSubtitleObjectURL; // Set the source to the generated object URL
+                    // trackElement.default = true; // Let browser/user choose default track
+
+                    // Append the new track element to the video player
                     videoPlayer.appendChild(trackElement);
-                    console.log(`Added subtitle track: ${subUrl}`);
+                    console.log(`Added subtitle track from local file: ${subtitleFile.name}`);
+
                 } catch (e) {
-                    console.error("Error adding subtitle track:", e);
+                    // Handle errors during object URL creation or element manipulation
+                    console.error("Error creating object URL or adding subtitle track:", e);
+                    alert(`Failed to load subtitle file: ${e.message}`);
+                    // Ensure the object URL variable is reset if an error occurred
+                    currentSubtitleObjectURL = null;
                 }
+            } else if (useSubtitles && !subtitleFile) {
+                 // Log a warning if the user enabled subtitles but didn't select a file
+                 console.warn("Subtitle toggle is on, but no subtitle file was selected.");
+                 // Optionally alert the user
+                 // alert("Please select a subtitle file (.vtt) if you want to add subtitles.");
             }
-            // --- End Subtitle Add ---
+            // --- END OF HIGHLIGHTED CHANGE ---
 
             // --- Resume Logic ---
             const savedTime = localStorage.getItem(RESUME_KEY_PREFIX + url);
@@ -77,18 +122,58 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             // --- End Resume Check ---
 
-            // Use 'canplay' event to set resume time
+            // --- Event Handler for when video is ready ---
             const canPlayHandler = () => {
                 console.log("'canplay' event fired.");
+
+                // 1. Attempt to Resume Playback
                 if (shouldResume && resumeTime < videoPlayer.duration) {
                     videoPlayer.currentTime = resumeTime;
                     console.log(`Resumed playback at ${resumeTime.toFixed(2)}s`);
-                    // Removed alert, as it might be annoying
-                    // alert(`Resuming from ${formatTime(resumeTime)}`);
                 }
-                // Removed call to loadTracks() as dropdowns are gone
+
+                // 2. Attempt to set default Hindi audio track
+                try {
+                    const audioTracks = videoPlayer.audioTracks;
+                    if (audioTracks && audioTracks.length > 1) {
+                        console.log(`[Audio Logic] Found ${audioTracks.length} audio tracks.`);
+                        let hindiTrackIndex = -1;
+                        for (let i = 0; i < audioTracks.length; i++) {
+                            const track = audioTracks[i];
+                            console.log(`[Audio Logic] Checking Track ${i}: Lang='${track.language}', Label='${track.label}'`);
+                            if (track.language === 'hi' || (track.label && track.label.toLowerCase().includes('hindi'))) {
+                                hindiTrackIndex = i;
+                                console.log(`[Audio Logic] Found potential Hindi track at index ${i}`);
+                                break;
+                            }
+                        }
+                        if (hindiTrackIndex !== -1) {
+                            console.log(`[Audio Logic] Enabling track ${hindiTrackIndex} and disabling others.`);
+                            for (let i = 0; i < audioTracks.length; i++) {
+                                audioTracks[i].enabled = (i === hindiTrackIndex);
+                            }
+                             setTimeout(() => {
+                                 for (let i = 0; i < audioTracks.length; i++) {
+                                     if(audioTracks[i].enabled) console.log(`[Audio Logic] Verification: Track ${i} is now enabled.`);
+                                 }
+                             }, 100);
+                        } else {
+                            console.log('[Audio Logic] Hindi audio track not found.');
+                        }
+                    } else if (audioTracks && audioTracks.length <= 1) {
+                         console.log('[Audio Logic] Only one or zero audio tracks detected. No selection needed.');
+                    } else {
+                        console.log('[Audio Logic] audioTracks API not supported or no tracks found.');
+                    }
+                } catch (e) {
+                    console.error("[Audio Logic] Error accessing or setting audio tracks:", e);
+                }
+
+                // Remove this listener after it runs once
                 videoPlayer.removeEventListener('canplay', canPlayHandler);
             };
+            // --- End Event Handler ---
+
             videoPlayer.addEventListener('canplay', canPlayHandler);
 
             // --- Load and Play ---
@@ -131,8 +216,16 @@ document.addEventListener('DOMContentLoaded', () => {
         videoPlayer.removeEventListener('timeupdate', saveResumeTime);
     }
 
-    // --- Removed loadTracks function ---
-    // --- Removed formatTime function (no longer used by alerts) ---
-    // --- Removed global control functions (playVideo, pauseVideo, etc.) ---
+    // --- START OF HIGHLIGHTED CHANGE: Add cleanup for object URL on page unload ---
+    // Add an event listener to revoke the object URL when the page is closed or navigated away from
+    // This is important for releasing memory associated with the blob URL
+    window.addEventListener('beforeunload', () => {
+        if (currentSubtitleObjectURL) {
+            URL.revokeObjectURL(currentSubtitleObjectURL);
+            console.log(`Revoked subtitle object URL on page unload: ${currentSubtitleObjectURL}`);
+        }
+    });
+    // --- END OF HIGHLIGHTED CHANGE ---
+
 
 }); // End of DOMContentLoaded
