@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Video Player (Dark Theme)</title>
+    <!-- Link to the custom CSS (same as the first example) -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Info Box (from first example) -->
+        <div class="info-box">
+            <p>Experience seamless video streaming with our URL Video Player Online. It's designed to play videos directly from any downloadable link in your browser.</p>
+            <p><strong>Note:</strong> Ensure the video URL has permissive CORS headers to allow playback.</p>
+        </div>
+
+        <!-- Input Area (from first example) -->
+        <div class="input-area">
+            <input type="url" id="videoUrl" placeholder="Paste Video URL Here!" required>
+            <div class="subtitle-toggle">
+                <label for="subtitle-switch">Want to add subtitles?</label>
+                <label class="switch">
+                    <input type="checkbox" id="subtitle-switch">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <input type="url" id="subtitle-url" placeholder="Paste Subtitle URL Here! (.vtt)" style="display: none;">
+            <!-- Changed button ID to match JS expectation -->
+            <button id="load-video-button">Play Video</button>
+        </div>
+
+        <!-- Player Container (from first example) -->
+        <div class="player-container">
+            <!-- Plain HTML Video Element (like second example) -->
+            <!-- Added 'controls' for native browser controls as a fallback/base -->
+            <video id="videoPlayer" controls width="100%">
+                <!-- Subtitle tracks will be added dynamically by JavaScript -->
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <!-- Custom Controls (from second example) -->
+        <div class="controls">
+            <button onclick="playVideo()">Play</button>
+            <button onclick="pauseVideo()">Pause</button>
+            <button onclick="toggleFullscreen()">Fullscreen</button>
+            <button onclick="togglePIP()">Picture-in-Picture</button>
+            <button onclick="skip(-10)">⏪ Back 10s</button>
+            <button onclick="skip(10)">⏩ Forward 10s</button>
+            <button onclick="increaseSpeed()">Speed +</button>
+            <button onclick="decreaseSpeed()">Speed -</button>
+            <select id="audioTracks" onchange="changeAudioTrack()">
+              <option value="">Select Audio Track</option>
+            </select>
+            <select id="subtitles" onchange="changeSubtitle()">
+              <option value="">Select Subtitle</option>
+            </select>
+        </div>
+
+         <!-- Recommendation Box (from first example) -->
+         <div class="info-box recommendation">
+            <p><strong>Recommended Browsers:</strong> Microsoft Edge, Google Chrome</p>
+        </div>
+    </div>
+
+    <!-- Link to the custom JS (logic from second example, modified) -->
+    <script src="script.js"></script>
+</body>
+</html>
