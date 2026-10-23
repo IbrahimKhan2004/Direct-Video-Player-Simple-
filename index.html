@@ -2,54 +2,49 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Video Player (Dark Theme)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="color-scheme" content="dark light">
+    <title>Online Video Player</title>
     <!-- Link to the custom CSS -->
     <link rel="stylesheet" href="style.css">
+    <!-- movi-player (moviplayer.com) - pinned version, loaded as an ES module -->
+    <script type="module" src="https://cdn.jsdelivr.net/npm/movi-player@0.4.1/dist/element.js"></script>
 </head>
 <body>
     <div class="container">
         <!-- Info Box -->
         <div class="info-box">
             <p>Experience seamless video streaming with our URL Video Player Online. It's designed to play videos directly from any downloadable link in your browser.</p>
-            <p><strong>Note:</strong> Ensure the video URL has permissive CORS headers to allow playback.</p>
+            <p><strong>Note:</strong> Ensure the video URL has permissive CORS headers and supports range requests to allow playback and seeking.</p>
         </div>
 
         <!-- Input Area -->
         <div class="input-area">
             <input type="url" id="videoUrl" placeholder="Paste Video URL Here!" required>
             <div class="subtitle-toggle">
-                <!-- *** START OF HIGHLIGHTED CHANGE *** -->
-                <label for="subtitle-switch">Want to add local subtitles? - VTT Subtitles Only</label> <!-- Changed label text -->
-                <!-- *** END OF HIGHLIGHTED CHANGE *** -->
+                <label for="subtitle-switch">Want to add local subtitles? - VTT Subtitles Only</label>
                 <label class="switch">
                     <input type="checkbox" id="subtitle-switch">
                     <span class="slider round"></span>
                 </label>
             </div>
-            <!-- *** START OF HIGHLIGHTED CHANGE *** -->
-            <!-- Changed input type to 'file', updated id, added accept attribute -->
             <input type="file" id="subtitle-file" accept=".vtt" style="display: none;">
-            <!-- *** END OF HIGHLIGHTED CHANGE *** -->
             <button id="load-video-button">Play Video</button>
         </div>
 
         <!-- Player Container -->
         <div class="player-container">
-            <!-- Plain HTML Video Element with native controls -->
-            <video id="videoPlayer" controls width="100%">
-                <!-- Subtitle tracks will be added dynamically by JavaScript -->
-                Your browser does not support the video tag.
-            </video>
+            <!-- movi-player: plays MKV, HEVC, AV1, HDR etc. that the native video tag cannot -->
+            <movi-player id="videoPlayer" controls playsinline theme="dark" sw="auto" fastseek thumb></movi-player>
         </div>
 
-        <!-- Footer Info Area (Replaces the custom controls) -->
-        <div class="footer-info info-box">  <!-- Reusing info-box style -->
+        <!-- Footer Info Area -->
+        <div class="footer-info info-box">
              <p><strong>Usage Tips:</strong></p>
              <ul>
-                 <li>Use the player's built-in controls (provided by your browser) for playback, volume, fullscreen, etc.</li>
-                 <li>Playback speed and track selection might be available in the native controls menu (often '...' or settings icon).</li>
-                 <li>Video playback depends on the source URL allowing cross-origin requests (CORS).</li>
+                 <li>Tap to play or pause. Double-tap the left or right side to skip 10 seconds. Swipe for seek and volume on mobile.</li>
+                 <li>Right-click (or long-press on mobile) the player for speed, aspect ratio, audio and subtitle tracks, HDR, Picture-in-Picture and more.</li>
+                 <li>Playback depends on the source URL allowing cross-origin requests (CORS) and range requests.</li>
              </ul>
              <p style="text-align: center; font-size: 0.8em; opacity: 0.7;">
                  © 2025 BashAFK. All rights reserved. <br>
@@ -57,10 +52,33 @@
              </p>
         </div>
 
+        <!-- Supported Formats / Help -->
+        <div class="info-box help" id="help">
+            <p><strong>What's Supported</strong></p>
+            <dl class="support-list">
+                <div><dt>Containers</dt><dd>MKV, MP4, M4V, AVI, MOV, FLV, MPEG-TS, WebM</dd></div>
+                <div><dt>Video</dt><dd>H.264, HEVC (H.265), AV1, VP9, VP8, MPEG-4 (DivX/Xvid), MPEG-2, H.266 (VVC)</dd></div>
+                <div><dt>Audio</dt><dd>AAC, Opus, FLAC, MP3, AC3, E-AC3, DTS, TrueHD</dd></div>
+                <div><dt>HDR</dt><dd>HDR10, HLG, Dolby Vision (profile 8)</dd></div>
+                <div><dt>Subtitles</dt><dd>Built-in SRT, ASS/SSA, WebVTT, PGS, DVB. Local files: .vtt (use the toggle above)</dd></div>
+                <div><dt>Streaming</dt><dd>Direct links (range requests), HLS (.m3u8), MPEG-DASH (.mpd)</dd></div>
+                <div><dt>Tracks</dt><dd>Multiple audio tracks (Hindi is picked automatically when found) and subtitle tracks</dd></div>
+                <div><dt>Resolution</dt><dd>Up to 4K. Playback speed 0.25x to 2x (capped at 1.5x for 4K and above)</dd></div>
+            </dl>
+            <p><strong>Features</strong></p>
+            <ul>
+                <li>Hardware-accelerated decoding (WebCodecs) with automatic software fallback</li>
+                <li>Resume playback where you left off, per video link</li>
+                <li>Seek preview thumbnails, Picture-in-Picture, fullscreen, snapshot, loop, rotate</li>
+                <li>Stable volume (loudness normalization) and stats for nerds</li>
+                <li>Everything runs in your browser. Nothing is uploaded</li>
+            </ul>
+            <p style="font-size: 0.85em; opacity: 0.7;">Powered by <a href="https://moviplayer.com/" target="_blank" rel="noopener">MoviPlayer</a>. Demuxed by FFmpeg (WebAssembly), decoded by WebCodecs.</p>
+        </div>
 
          <!-- Recommendation Box -->
          <div class="info-box recommendation">
-            <p><strong>Recommended Browsers:</strong> Microsoft Edge, Google Chrome</p>
+            <p><strong>Recommended Browsers:</strong> Microsoft Edge, Google Chrome (Safari 18+ and Firefox 130+ also work)</p>
         </div>
     </div>
 
