@@ -6,8 +6,6 @@
     <title>Online Video Player (Dark Theme)</title>
     <!-- Link to the custom CSS -->
     <link rel="stylesheet" href="style.css">
-    <!-- MoviPlayer custom element CDN -->
-    <script type="module" src="https://cdn.jsdelivr.net/npm/movi-player/dist/element.js"></script>
 </head>
 <body>
     <div class="container">
@@ -38,11 +36,11 @@
 
         <!-- Player Container -->
         <div class="player-container">
-            <!-- MoviPlayer Custom Element -->
-            <movi-player id="videoPlayer" controls width="100%">
+            <!-- Plain HTML Video Element with native controls -->
+            <video id="videoPlayer" controls width="100%">
                 <!-- Subtitle tracks will be added dynamically by JavaScript -->
                 Your browser does not support the video tag.
-            </movi-player>
+            </video>
         </div>
 
         <!-- Footer Info Area (Replaces the custom controls) -->
